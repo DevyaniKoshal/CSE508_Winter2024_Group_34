@@ -1,4 +1,5 @@
-# CSE508_Winter2024_Group_34
+# CSE508 Winter2024: Information Retrieval
+## Group 34
 
 ### Book Summarizer and QnA ChatBot
 
