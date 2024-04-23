@@ -46,6 +46,19 @@ def doc_reload():
     return query_engine
 
 
+# Example usage
+# pdf_path = 'path_to_your_pdf.pdf'
+# spell_checker = update_spellchecker_with_pdf(pdf_path)
+# print("Personal dictionary updated. Total unique words:", len(spell_checker.word_frequency))
+
+
+
+
+# Specify the path to your PDF directory
+pdf_directory_path = '/data'
+
+
+
 # print(query_engine.query("what is attention"))
 # Start a server to listen for queries
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -72,14 +85,19 @@ while True:
 
         query = query_data.decode()
         print(f'Received query: {query}')
-
+        
         if query=="$file$added$":
             query_engine = doc_reload()
+            # update_spellchecker_with_pdf(pdf_directory_path)
             response_str = "success"
         else:
             # Process the query and generate the response
             response_obj = query_engine.query(query)
+            sim_q = f"generate 3 relevant queries to the query:{query}"
+            sim_obj = query_engine.query(sim_q)
             response_str = str(response_obj)  # Convert the Response object to a string
+            sim_str = str(sim_obj)
+            response_str+=("$$"+sim_str)
         print(f"response: {response_str}")
         # Send the response back to the client
         response_bytes = response_str.encode()
