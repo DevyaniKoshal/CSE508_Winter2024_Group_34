@@ -132,6 +132,24 @@
         .file-upload button:hover {
             background-color: #0E8E6F;
         }
+        .similar-queries {
+            padding: 7px;
+            background-color: #2A2A35;
+            text-align: center;
+        }
+        .similar-query {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px;
+            background: #555;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .similar-query:hover {
+            background-color: #777;
+        }
     </style>
 </head>
 <body>
@@ -153,12 +171,19 @@
         </div>
         {% endfor %}
     </div>
+    <div class="similar-queries">
+        <span>Suggested Queries:</span>
+        {% for query in similar_queries %}
+            <span class="similar-query" onclick="copyToClipboard('{{ query }}')">{{ query }}</span>
+        {% endfor %}
+    </div>
     <div class="input-container">
-        <form method="post">
+        <form method="post" id="queryForm">
             <input type="text" name="query" id="query" placeholder="Type your message..." required size="140">
             <button type="submit">Send</button>
         </form>
     </div>
+    
     <div class="file-upload">
         <form method="post">
             <input type="text" name="url" id="url" placeholder="Enter Google Drive file URL here..." required size="75">
@@ -168,5 +193,19 @@
     </div>
     
 </div>
+<script>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            console.log('Successfully copied to clipboard: ' + text);
+            alert('Copied to clipboard: ' + text);  // You can keep the alert or replace it with a more subtle notification
+        }).catch(function(error) {
+            console.error('Could not copy text: ', error);
+            alert('Failed to copy text. Please try again.');
+        });
+    }
+</script>
+    
+    
+    
 </body>
 </html>
