@@ -99,19 +99,29 @@
             background-color: #0E8E6F;
         }
 
+
+
         .file-upload {
             padding: 10px;
+            display: flex;
+            width: calc(100% - 20px);
+            margin: 0 auto;
             background-color: #343541;
-            text-align: center;
         }
 
-        .file-upload input[type="file"] {
-            display: none;
+        .file-upload input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            margin-right: 10px;
+            background-color: #40414F;
+            color: #fff;
         }
 
-        .file-upload label {
-            display: inline-block;
+        .file-upload button {
             padding: 10px 20px;
+            border: none;
             background-color: #10A37F;
             color: #fff;
             border-radius: 4px;
@@ -119,12 +129,21 @@
             transition: background-color 0.3s ease;
         }
 
-        .file-upload label:hover {
+        .file-upload button:hover {
             background-color: #0E8E6F;
         }
     </style>
 </head>
 <body>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
 <div class="chatbot-container">
     <div class="title">BookBuddy</div>
     <div class="chat-window">
@@ -135,17 +154,19 @@
         {% endfor %}
     </div>
     <div class="input-container">
-        <form method="post" enctype="multipart/form-data">
-            <input type="text" id="query" name="query" placeholder="Type your message..." required>
+        <form method="post">
+            <input type="text" name="query" id="query" placeholder="Type your message..." required size="140">
             <button type="submit">Send</button>
         </form>
     </div>
     <div class="file-upload">
-        <form method="post" enctype="multipart/form-data">
-            <input type="file" name="file" accept=".pdf" id="file-input" style="display: none;">
-            <label for="file-input">Upload PDF</label>
+        <form method="post">
+            <input type="text" name="url" id="url" placeholder="Enter Google Drive file URL here..." required size="75">
+            <input type="text" name="filename" id="filename" placeholder="Enter filename with .type">
+            <button type="submit">Upload PDF</button>
         </form>
     </div>
+    
 </div>
 </body>
 </html>
