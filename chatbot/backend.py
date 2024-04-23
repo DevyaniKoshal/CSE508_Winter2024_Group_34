@@ -10,7 +10,7 @@ from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 import socket
 import pickle
 # Define your system prompt, query wrapper prompt, and documents here
-documents=SimpleDirectoryReader("/raid/home/arya20498/ir/data").load_data()
+documents=SimpleDirectoryReader("/raid/home/arya20498/ir/flask/data").load_data()
 system_prompt="""
 You are a Q&A assistant. Your goal is to answer questions as
 accurately as possible based on the instructions and context provided.
@@ -39,14 +39,20 @@ service_context = ServiceContext.from_defaults(
 index = VectorStoreIndex.from_documents(documents, service_context=service_context)
 query_engine = index.as_query_engine()
 
+def doc_reload():
+    documents=SimpleDirectoryReader("/raid/home/arya20498/ir/flask/data").load_data()
+    index = VectorStoreIndex.from_documents(documents, service_context=service_context)
+    query_engine = index.as_query_engine()
+    return query_engine
+
 
 # print(query_engine.query("what is attention"))
 # Start a server to listen for queries
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind(('localhost', 6969))
+server_socket.bind(('localhost', 6970))
 server_socket.listen(1)
 
-print('Query engine server is listening on localhost:6969')
+print('Query engine server is listening on localhost:6970')
 
 while True:
     print('Waiting for a connection...')
@@ -67,11 +73,14 @@ while True:
         query = query_data.decode()
         print(f'Received query: {query}')
 
-        # Process the query and generate the response
-        response_obj = query_engine.query(query)
-        response_str = str(response_obj)  # Convert the Response object to a string
+        if query=="$file$added$":
+            query_engine = doc_reload()
+            response_str = "success"
+        else:
+            # Process the query and generate the response
+            response_obj = query_engine.query(query)
+            response_str = str(response_obj)  # Convert the Response object to a string
         print(f"response: {response_str}")
-
         # Send the response back to the client
         response_bytes = response_str.encode()
         header = len(response_bytes).to_bytes(4, byteorder='big')
