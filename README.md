@@ -33,6 +33,3 @@ The code for this is available in the chatbot directory.
 2. Install the dependecies in the requirements.txt file.
 3. Parallely run python backend.py and python app.py.
 4. Follow the link.
-
-#### Mid Review - Vector database created using Llama Index
-#### LangChain - RAG impleemented using LangChain
