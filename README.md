@@ -33,3 +33,7 @@ The code for this is available in the chatbot directory.
 2. Install the dependecies in the requirements.txt file.
 3. Parallely run python backend.py and python app.py.
 4. Follow the link.
+
+Sample chat with the model
+![image](https://github.com/DevyaniKoshal/CSE508_Winter2024_Group_34/assets/114855347/83b81445-6283-4d5a-ad36-9b330a0cbd52)
+
