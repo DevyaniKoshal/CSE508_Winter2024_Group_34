@@ -3,12 +3,49 @@ import os
 import requests
 import socket
 
+
+from spellchecker import SpellChecker
+import re
+import PyPDF2
+
+data_folder = "/raid/home/arya20498/ir/flask/data"
+
+
+def extract_text_from_pdf(pdf_path):
+    text = ""
+    with open(pdf_path, 'rb') as file:
+        reader = PyPDF2.PdfReader(file)
+        for page in reader.pages:
+            text += page.extract_text()
+    return text
+
+def extract_words(text):
+    words = re.findall(r'\b\w+\b', text.lower())  # Extract words and convert to lowercase
+    return set(words)  # Use a set to avoid duplicates
+
+def add_words_to_spellchecker(words):
+    spell = SpellChecker()
+    spell.word_frequency.load_words(words)
+    return spell
+def update_spellchecker_with_pdf(pdf_path):
+    text=""
+    for filename in os.listdir(data_folder):
+        if filename.lower().endswith('.pdf'):
+            pdf_path = os.path.join(data_folder, filename)
+            text = extract_text_from_pdf(pdf_path)
+    words = extract_words(text)
+    spell_checker = add_words_to_spellchecker(words)
+    print("spellchecker updated")
+    return spell_checker
+
+
+
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 # Assuming '/raid/home/arya20498/ir/flask/upload' is your intended upload directory
-data_folder = "/raid/home/arya20498/ir/flask/data"
 os.makedirs(data_folder, exist_ok=True)
+
 
 app.config['UPLOAD_FOLDER'] = data_folder
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max-limit for files
@@ -19,18 +56,27 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    # spell_checker = update_spellchecker_with_pdf(data_folder)
+    spell_checker = SpellChecker()
     if 'messages' not in session:
         session['messages'] = []
 
     if request.method == 'POST':
         if 'query' in request.form:
             query = request.form['query']
+            corrected_query_words = [spell_checker.correction(word) for word in query.split()]
+            query = ' '.join(corrected_query_words)
+            print(f'Corrected query: {query}')
             session['messages'].append({'user': True, 'content': query})
             session.modified = True
-            response = send_query_to_server(query)
+            response, similar_queries = send_query_to_server(query).split("$$")
+            # reponse, sim = response
+            sim_queries = ' '.join(similar_queries.split(":")[1:])
+            sim_queries = sim_queries.split("?")[:-1]
+            print(f"similar queries: {sim_queries}")
             session['messages'].append({'user': False, 'content': response})
             session.modified = True
-            return render_template('index.html', messages=session['messages'])
+            return render_template('index.html', messages=session['messages'], similar_queries=sim_queries)
 
         if 'url' in request.form:
             url = request.form.get('url')
@@ -42,13 +88,14 @@ def index():
                     response = send_query_to_server(query)
                     if response == "success":
                         flash(f"Downloaded {filename} successfully")
+                        # spell_checker = update_spellchecker_with_pdf(data_folder)
                     else:
                         flash("failed")
                 else:
                     flash("Failed to download the file.")
                 return redirect(url_for('index'))
 
-    return render_template('index.html', messages=session.get('messages', []))
+    return render_template('index.html', messages=session.get('messages', []), similar_queries=[])
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
